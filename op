@@ -1,0 +1,68 @@
+import argparse
+import os
+import sys
+from op_resources import *
+
+parser = argparse.ArgumentParser(
+    prog='python3 op',
+    formatter_class=argparse.RawDescriptionHelpFormatter)
+
+parser.add_argument('-q', '--question', type=int,
+                    help="run tests for a specific question")
+
+parser.add_argument('-p', '--phase', type=int,
+                    help="check if phase is completed")
+
+parser.add_argument('-u', '--unlock', help="unlock tests interactively", action='store_true')
+
+args = parser.parse_args()
+
+q = args.question is not None
+u = args.unlock
+p = args.phase is not None
+
+q_num = args.question
+p_num = args.phase
+
+"""
+
+Inputted argument possibilities:
+
+Q = question number
+U = unlock
+P = phase
+
+Q U P
+1 1 1 - error
+1 1 0 - run wwpd for Q
+1 0 1 - error
+1 0 0 - run doctests for Q
+0 1 0 - error
+0 1 1 - error
+0 0 1 - print whether phase's code & wwpd are completed
+0 0 0 - print whether entire project is completed
+
+"""
+
+# Handle all errors first
+if (q and u and p) or (q and not u and p) or (not q and u and not p) or (not q and u and p):
+    print("Error: arguments inputted does not make sense")
+
+# Run WWPD for q
+elif q and u and not p:
+    print('running wwpd')
+    run_wwpd(q_num)
+
+# Run doctests for q
+elif q and not u and not p:
+    run_doctests(q_num)
+
+# Print whether phase's code & WWPD are completed
+elif not q and not u and p:
+    phase_done(p_num)
+
+# Print whether project is complete
+elif not q and not u and not p:
+    done = phase_done(1) and phase_done(2)
+    if done:
+        print('Hog is completed!')
